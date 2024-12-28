@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Graph</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        canvas {
+            border: 1px solid #000;
+            background-color: #fff;
+        }
+        #controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="graphCanvas" width="800" height="600"></canvas>
+    <div id="controls">
+        <button id="addSegment">Add Segment</button>
+        <button id="queryPoint">Query Point</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('graphCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let highlightedSegment = null;
+        let lineSegments = [];
+        let isAddingSegment = false;
+        let isQueryingPoint = false;
+        let currentSegment = [];
+        let mousePosition = { x: 0, y: 0 };
+
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mousePosition.x = e.clientX - rect.left;
+            mousePosition.y = e.clientY - rect.top;
+            redraw();
+            if (isAddingSegment && currentSegment.length === 1) {
+                ctx.strokeStyle = 'blue';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(currentSegment[0].x, currentSegment[0].y);
+                ctx.lineTo(mousePosition.x, mousePosition.y);
+                ctx.stroke();
+            } else if (isAddingSegment) {
+                ctx.fillStyle = 'blue';
+                ctx.beginPath();
+                ctx.arc(mousePosition.x, mousePosition.y, 5, 0, 2 * Math.PI);
+                ctx.fill();
+            } else if (isQueryingPoint) {
+                ctx.strokeStyle = 'green';
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.moveTo(mousePosition.x, mousePosition.y);
+                ctx.lineTo(mousePosition.x, canvas.height);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                ctx.fillStyle = 'green';
+                ctx.beginPath();
+                ctx.arc(mousePosition.x, mousePosition.y, 5, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+        });
+
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            highlightedSegment = null;
+
+            if (isAddingSegment) {
+                currentSegment.push({ x, y });
+                if (currentSegment.length === 2) {
+                    lineSegments.push(currentSegment);
+                    currentSegment = [];
+                    isAddingSegment = false;
+                    redraw();
+                }
+            } else if (isQueryingPoint) {
+                isQueryingPoint = false;
+                queryPointHandler({ x, y });
+            }
+        });
+
+        document.getElementById('addSegment').addEventListener('click', () => {
+            isAddingSegment = true;
+            isQueryingPoint = false;
+        });
+
+        document.getElementById('queryPoint').addEventListener('click', () => {
+            isQueryingPoint = true;
+            isAddingSegment = false;
+        });
+
+        function queryPointHandler(point) {
+            const intersected = findIntersectedLine(point);
+
+            if (intersected) {
+                highlightSegment(intersected);
+            }
+        }
+
+        function findIntersectedLine(point) {
+            let intersections = [];
+            const ray = { x1: point.x, y1: point.y, x2: point.x, y2: canvas.height };
+
+            for (let segment of lineSegments) {
+                const [p1, p2] = segment;
+                const intersection = getIntersection(ray, { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y });
+
+                if (intersection) {
+                    intersections.push({ segment, intersection });
+                }
+            }
+
+            if (intersections.length === 0) return null;
+            intersections.sort((a, b) => a.intersection.y - b.intersection.y);
+            return intersections[0].segment;
+        }
+
+        function getIntersection(ray, segment) {
+            const { x1: x1, y1: y1, x2: x2, y2: y2 } = ray;
+            const { x1: x3, y1: y3, x2: x4, y2: y4 } = segment;
+
+            const denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+            if (denom === 0) return null;
+
+            const t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / denom;
+            const u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / denom;
+
+            if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
+                return {
+                    x: x1 + t * (x2 - x1),
+                    y: y1 + t * (y2 - y1),
+                };
+            }
+
+            return null;
+        }
+
+        function highlightSegment(segment) {
+            highlightedSegment = segment;
+            redraw();
+        }
+
+        function redraw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 1;
+
+            for (let segment of lineSegments) {
+                const [p1, p2] = segment;
+                ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.stroke();
+            }
+            if (highlightedSegment !== null) {
+                ctx.strokeStyle = 'red';
+                ctx.lineWidth = 2;
+                const [p1, p2] = highlightedSegment;
+                ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.stroke();
+            }
+        }
+    </script>
+</body>
+</html>
