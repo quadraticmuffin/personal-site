@@ -102,7 +102,7 @@ class RedBlackTree {
     // Preorder traversal
     preOrderHelper(node) {
         if (node !== this.TNULL) {
-            process.stdout.write(node.data + " ");
+            process.stdout.write(node.data.getValue(this.x) + " ");
             this.preOrderHelper(node.left);
             this.preOrderHelper(node.right);
         }
@@ -112,7 +112,7 @@ class RedBlackTree {
     inOrderHelper(node) {
         if (node !== this.TNULL) {
             this.inOrderHelper(node.left);
-            process.stdout.write(node.data + " ");
+            process.stdout.write(node.data.getValue(this.x) + " ");
             this.inOrderHelper(node.right);
         }
     }
@@ -122,13 +122,13 @@ class RedBlackTree {
         if (node !== this.TNULL) {
             this.postOrderHelper(node.left);
             this.postOrderHelper(node.right);
-            process.stdout.write(node.data + " ");
+            process.stdout.write(node.data.getValue(this.x) + " ");
         }
     }
 
     // Search the tree
     searchTreeHelper(node, key) {
-        if (node === this.TNULL || key === node.data) {
+        if (node === this.TNULL || key === node.getValue(this.x)) {
             return node;
         }
         if (key < node.getValue(this.x)) {
@@ -183,10 +183,10 @@ class RedBlackTree {
         let z = this.TNULL;
         let x, y;
         while (node !== this.TNULL) {
-            if (node.data === key) {
+            if (node.getValue(this.x) === key.getY(this.x)) {
                 z = node;
             }
-            if (node.getValue(this.x) <= key) {
+            if (node.getValue(this.x) <= key.getY(this.x)) {
                 node = node.right;
             } else {
                 node = node.left;
