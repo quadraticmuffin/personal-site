@@ -23,6 +23,8 @@
     </style>
 </head>
 <body>
+    <h2>Vertical Ray Shooting in a Planar Graph: O(log n) query, O(n) space</h2>
+    <p>After I add persistence, anyway...</p>
     <div style="display: flex; justify-content: center;">
         <canvas id="graphCanvas" width="600" height="600"></canvas>
         <canvas id="treeCanvas" width="600" height="600"></canvas>
@@ -207,7 +209,8 @@
                 ctx.beginPath();
                 ctx.moveTo(p1.x, p1.y);
                 ctx.font = "8px Tahoma";
-                ctx.fillText(p1.x < p2.x ? p1.y : p2.y, avg_x+10*Math.cos(theta), avg_y+10*Math.sin(theta));
+                const display_y = p1.x < p2.x ? Math.round(p1.y) : Math.round(p2.y)
+                ctx.fillText(display_y, avg_x+10*Math.cos(theta), avg_y+10*Math.sin(theta));
                 ctx.lineTo(p2.x, p2.y);
                 ctx.stroke();
             }
@@ -240,7 +243,7 @@
 
                 ctx.fillStyle = 'green';
                 ctx.font = "8px Tahoma";
-                ctx.fillText(queryPoint.y, queryPoint.x, queryPoint.y-10);
+                ctx.fillText(Math.round(queryPoint.y), queryPoint.x, queryPoint.y-10);
                 ctx.beginPath();
                 ctx.arc(queryPoint.x, queryPoint.y, 5, 0, 2 * Math.PI);
                 ctx.fill();

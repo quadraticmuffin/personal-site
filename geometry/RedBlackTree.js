@@ -436,7 +436,7 @@ function drawTree(canvasId, tree, highlight) {
             if (highlight && node.data == highlight) {
                 ctx.fillStyle = ("GREEN");
             }
-            ctx.fillText(node.data.valueOf(), x, y);
+            ctx.fillText(Math.round(node.data.valueOf()), x, y);
         }
         if (node.left) {
             drawTreeInner(node.left, x - dx, y + 30, x);
