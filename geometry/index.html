@@ -6,33 +6,33 @@
     <title>Interactive Graph</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f4f4f4;
-            text-align: center;
             flex-direction: column;
+            align-items: center; /* Center aligns the canvases and button */
         }
         canvas {
-            display: block;
+            display: inline-block; /* Change to inline-block for side-by-side layout */
             border: 1px solid #000;
             background-color: #fff;
+            margin: 5px; /* Adjust margin for spacing */
         }
         button {
-            display: block;  /* Ensures the button appears below the canvas */
-            margin: 10px auto;  /* Centers the button */
-            cursor: pointer;  /* Changes cursor to pointer on hover */        
+            display: block;  /* Ensures the button appears below the canvases */
+            margin-top: 10px; /* Add some space above the button */
         }
     </style>
 </head>
 <body>
-    <canvas id="graphCanvas" width="800" height="600"></canvas>
+    <div style="display: flex; justify-content: center;">
+        <canvas id="graphCanvas" width="400" height="600"></canvas>
+        <canvas id="treeCanvas" width="400" height="600"></canvas>
+    </div>
     <button id="clearCanvas">Clear Canvas</button>
-    <script>
+    <script type="module">
+        import RedBlackNode from './RedBlackNode.js';
+        import { drawTree, exampleRedBlackTree } from './RedBlackNode.js';
+        exampleRedBlackTree.printTree();
+        drawTree('treeCanvas', exampleRedBlackTree);
         const canvas = document.getElementById('graphCanvas');
         const ctx = canvas.getContext('2d');
         
@@ -40,7 +40,6 @@
         let intersectionPoint = null;
         let highlightedSegment = null;
         let lineSegments = [];
-        let isAddingSegment = false;
         let isQueryingPoint = false;
         let currentSegment = [];
         let mousePosition = { x: 0, y: 0 };
@@ -70,9 +69,16 @@
             const y = e.clientY - rect.top;
             currentSegment.push({ x, y });
             if (currentSegment.length === 2) {
+                for (const segment of lineSegments) {
+                    console.log(getIntersection(segment, currentSegment));
+                    if (getIntersection(segment, currentSegment) !== null) {
+                        console.log("Can't place intersecting segments");
+                        currentSegment = [];
+                        return;
+                    }
+                }
                 lineSegments.push(currentSegment);
                 currentSegment = [];
-                isAddingSegment = false;
                 redraw();
             }
         });
@@ -102,7 +108,6 @@
                 intersectionPoint = res.intersection;
                 redraw();
             }
-            
         }
 
         function clearQuery() {
@@ -113,12 +118,10 @@
 
         function findIntersectedLine(point) {
             let intersections = [];
-            const ray = { x1: point.x, y1: point.y, x2: point.x, y2: canvas.height };
+            const ray = [{ x: point.x, y: point.y }, { x: point.x, y: canvas.height }];
 
             for (let segment of lineSegments) {
-                const [p1, p2] = segment;
-                const intersection = getIntersection(ray, { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y });
-
+                const intersection = getIntersection(ray, segment);
                 if (intersection) {
                     intersections.push({ segment, intersection });
                 }
@@ -129,9 +132,11 @@
             return intersections[0];
         }
 
-        function getIntersection(ray, segment) {
-            const { x1: x1, y1: y1, x2: x2, y2: y2 } = ray;
-            const { x1: x3, y1: y3, x2: x4, y2: y4 } = segment;
+        function getIntersection(segment1, segment2) {
+            const { x: x1, y: y1 } = segment1[0];
+            const { x: x2, y: y2 } = segment1[1];
+            const { x: x3, y: y3 } = segment2[0];
+            const { x: x4, y: y4 } = segment2[1];
 
             const denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
             if (denom === 0) return null;
