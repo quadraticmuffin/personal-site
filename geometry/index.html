@@ -195,7 +195,7 @@
             ctx.textAlign = "center";
             ctx.fillStyle = "black";
             ctx.fillText("Click on the canvas to add a line segment. Right-click to query a point.",canvas.width/2,30);
-            ctx.fillText("Lines drawn may not intersect.",canvas.width/2,50);
+            ctx.fillText("Segments drawn must not intersect.",canvas.width/2,50);
 
             for (let segment of lineSegments) {
                 const [p1, p2] = segment;
