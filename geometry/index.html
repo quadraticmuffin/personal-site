@@ -45,13 +45,13 @@
             }
         }
         const exampleRedBlackTree = new RedBlackTree();
-        for (let i = 31; i >= 1; i--) {
-            const p1 = new Point(i, i, null);
-            const p2 = new Point(i + 1, i + 1, null);
-            p1.other = p2;
-            p2.other = p1;
-            exampleRedBlackTree.insert(p1);
-        }
+        // for (let i = 31; i >= 1; i--) {
+        //     const p1 = new Point(i, i, null);
+        //     const p2 = new Point(i + 1, i + 1, null);
+        //     p1.other = p2;
+        //     p2.other = p1;
+        //     exampleRedBlackTree.insert(p1);
+        // }
         drawTree('treeCanvas', exampleRedBlackTree);
 
         const canvas = document.getElementById('graphCanvas');

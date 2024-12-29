@@ -424,6 +424,11 @@ function drawTree(canvasId, tree, highlight) {
 
     // Simple visualization logic (you can enhance this)
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.font = "15px Tahoma";
+    ctx.textAlign = "center";
+    ctx.fillStyle = "black";
+    ctx.fillText("A self-balancing binary search tree stores segments intersected by the query ray.",canvas.width/2,30);
+    ctx.fillText("They are ordered by y-coord, so a successor query gives the first intersecting segment.",canvas.width/2,50);
     function drawTreeInner(node, x, y, prev_x) {
         ctx.fillStyle = (node.color === 1 ? "RED" : "BLACK");
         const dx = Math.abs((x - prev_x) / 2);
@@ -440,8 +445,8 @@ function drawTree(canvasId, tree, highlight) {
             drawTreeInner(node.right, x + dx, y + 30, x);
         }
     }
-
-    drawTreeInner(tree.root, canvas.width / 2, 60, 0);
+    ctx.font = "10px Tahoma";
+    drawTreeInner(tree.root, canvas.width / 2, 100, 0);
 }
 
 // Exporting the RedBlackTree class
