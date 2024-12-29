@@ -24,12 +24,12 @@
 </head>
 <body>
     <div style="display: flex; justify-content: center;">
-        <canvas id="graphCanvas" width="400" height="600"></canvas>
-        <canvas id="treeCanvas" width="400" height="600"></canvas>
+        <canvas id="graphCanvas" width="600" height="600"></canvas>
+        <canvas id="treeCanvas" width="600" height="600"></canvas>
     </div>
     <button id="clearCanvas">Clear Canvas</button>
     <script type="module">
-        import RedBlackNode from './RedBlackNode.js';
+        import RedBlackTree from './RedBlackTree.js';
         import { drawTree, exampleRedBlackTree } from './RedBlackNode.js';
         exampleRedBlackTree.printTree();
         drawTree('treeCanvas', exampleRedBlackTree);
@@ -70,9 +70,8 @@
             currentSegment.push({ x, y });
             if (currentSegment.length === 2) {
                 for (const segment of lineSegments) {
-                    console.log(getIntersection(segment, currentSegment));
                     if (getIntersection(segment, currentSegment) !== null) {
-                        console.log("Can't place intersecting segments");
+                        console.log("Can't place intersecting segments!");
                         currentSegment = [];
                         return;
                     }
