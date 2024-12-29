@@ -30,17 +30,38 @@
     <button id="clearCanvas">Clear Canvas</button>
     <script type="module">
         import RedBlackTree from './RedBlackTree.js';
-        import { drawTree, exampleRedBlackTree } from './RedBlackNode.js';
-        exampleRedBlackTree.printTree();
+        import { drawTree } from './RedBlackTree.js';
+        class Point {
+            constructor(x, y, other) {
+                this.x = x;
+                this.y = y;
+                this.other = other;
+            }
+            getY(x) {
+                return this.y + (x - this.x) * (this.other.y - this.y) / (this.other.x - this.x);
+            }
+            valueOf() {
+                return this.y;
+            }
+        }
+        const exampleRedBlackTree = new RedBlackTree();
+        for (let i = 31; i >= 1; i--) {
+            const p1 = new Point(i, i, null);
+            const p2 = new Point(i + 1, i + 1, null);
+            p1.other = p2;
+            p2.other = p1;
+            exampleRedBlackTree.insert(p1);
+        }
         drawTree('treeCanvas', exampleRedBlackTree);
+
         const canvas = document.getElementById('graphCanvas');
         const ctx = canvas.getContext('2d');
         
         let queryPoint = null;
         let intersectionPoint = null;
         let highlightedSegment = null;
+        let sweptSegment = null;
         let lineSegments = [];
-        let isQueryingPoint = false;
         let currentSegment = [];
         let mousePosition = { x: 0, y: 0 };
 
@@ -72,7 +93,7 @@
                 for (const segment of lineSegments) {
                     if (getIntersection(segment, currentSegment) !== null) {
                         console.log("Can't place intersecting segments!");
-                        currentSegment = [];
+                        currentSegment = [currentSegment[0]];
                         return;
                     }
                 }
@@ -91,6 +112,7 @@
         document.addEventListener('contextmenu', (e) => {
             event.preventDefault(); // Prevent the default context menu from appearing
 
+            currentSegment = [];
             clearQuery();
 
             const rect = canvas.getBoundingClientRect();
@@ -101,16 +123,27 @@
 
         function queryPointHandler(point) {
             const res = findIntersectedLine(point);
-            queryPoint = point;
             if (res) {
                 highlightedSegment = res.segment;
                 intersectionPoint = res.intersection;
                 redraw();
             }
+            queryPoint = point;
+            const res2 = sweepLine(queryPoint);
+            if (res2) {
+                sweptSegment = res2;
+                console.log(`Successor: ${sweptSegment[0].y}`);
+                redraw();
+            }
+            else {
+                console.log(`Successor: null`);
+            }
+            
         }
 
         function clearQuery() {
             highlightedSegment = null;
+            sweptSegment = null;
             queryPoint = null;
             intersectionPoint = null;
         }
@@ -158,22 +191,39 @@
             ctx.strokeStyle = 'black';
             ctx.lineWidth = 1;
 
-            ctx.font = "20px Tahoma";
+            ctx.font = "15px Tahoma";
             ctx.textAlign = "center";
             ctx.fillStyle = "black";
             ctx.fillText("Click on the canvas to add a line segment. Right-click to query a point.",canvas.width/2,30);
+            ctx.fillText("Lines drawn may not intersect.",canvas.width/2,50);
 
             for (let segment of lineSegments) {
                 const [p1, p2] = segment;
+                const slope = (p2.y - p1.y) / (p2.x - p1.x);
+                const perp = -1 / slope;
+                const theta = Math.atan(perp);
+                const avg_x = (p1.x + p2.x) / 2;
+                const avg_y = (p1.y + p2.y) / 2;
+                ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y);
+                ctx.font = "8px Tahoma";
+                ctx.fillText(p1.x < p2.x ? p1.y : p2.y, avg_x+10*Math.cos(theta), avg_y+10*Math.sin(theta));
+                ctx.lineTo(p2.x, p2.y);
+                ctx.stroke();
+            }
+            if (highlightedSegment !== null) {
+                ctx.strokeStyle = 'purple';
+                ctx.lineWidth = 2;
+                const [p1, p2] = highlightedSegment;
                 ctx.beginPath();
                 ctx.moveTo(p1.x, p1.y);
                 ctx.lineTo(p2.x, p2.y);
                 ctx.stroke();
             }
-            if (highlightedSegment !== null) {
-                ctx.strokeStyle = 'red';
+            if (sweptSegment !== null) {
+                ctx.strokeStyle = 'green';
                 ctx.lineWidth = 2;
-                const [p1, p2] = highlightedSegment;
+                const [p1, p2] = sweptSegment;
                 ctx.beginPath();
                 ctx.moveTo(p1.x, p1.y);
                 ctx.lineTo(p2.x, p2.y);
@@ -184,20 +234,56 @@
                 ctx.setLineDash([5, 5]);
                 ctx.beginPath();
                 ctx.moveTo(queryPoint.x, queryPoint.y);
-                if (intersectionPoint !== null) {
-                    ctx.lineTo(queryPoint.x, intersectionPoint.y);
-                }
-                else {
-                    ctx.lineTo(queryPoint.x, canvas.height);
-                }
+                ctx.lineTo(queryPoint.x, canvas.height);
                 ctx.stroke();
                 ctx.setLineDash([]);
 
                 ctx.fillStyle = 'green';
+                ctx.font = "8px Tahoma";
+                ctx.fillText(queryPoint.y, queryPoint.x, queryPoint.y-10);
                 ctx.beginPath();
                 ctx.arc(queryPoint.x, queryPoint.y, 5, 0, 2 * Math.PI);
                 ctx.fill();
             }
+        }
+
+        function sweepLine(queryPoint) {
+            const tree = new RedBlackTree();
+            const points = [];
+            for (const segment of lineSegments) {
+                const { x: x1, y: y1 } = segment[0];
+                const { x: x2, y: y2 } = segment[1];
+                const p1 = new Point(x1, y1, null);
+                const p2 = new Point(x2, y2, null);
+                p1.other = p2;
+                p2.other = p1;
+                points.push(p1);
+                points.push(p2);
+            }
+            points.sort((a, b) => a.x - b.x);
+            for (const point of points) {
+                tree.x = point.x;
+                if (point.x > queryPoint.x) {
+                    break;
+                }
+                if (point.x < point.other.x) {
+                    tree.insert(point);
+                }
+                else {
+                    tree.deleteNode(point.other);
+                }
+            }
+            // tree.printTree();
+            // successor query on queryPoint in tree
+            tree.x = queryPoint.x;
+            const successor = tree.successor(queryPoint.y);
+            const highlight = successor ? successor.y : null;
+            drawTree('treeCanvas', tree, highlight);
+            redraw();
+            if (successor) {
+                return [successor, successor.other];
+            }
+            return null;
         }
     </script>
 </body>
