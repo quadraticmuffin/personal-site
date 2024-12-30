@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Graph</title>
+    <title>Vertical Ray Shooting</title>
     <style>
         body {
             display: flex;
@@ -272,7 +272,7 @@
                 if (point.x < point.other.x) {
                     tree.insert(point);
                 }
-                else {
+                else if (queryPoint.x > point.x) {
                     tree.deleteNode(point.other);
                 }
             }
