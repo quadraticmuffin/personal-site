@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lit Survey</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        header {
+            /* background: #333; */
+            /* color: #fff; */
+            padding: 10px 20px;
+            text-align: center;
+        }
+        main {
+            padding: 20px;
+        }
+        ul {
+            margin: 0
+        }
+        ul li a {
+            color: #007BFF;
+        }
+        ul li a:hover {
+            text-decoration: underline;
+        }
+        p {
+            margin: 0
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <header>
+            <h1>Hand-Typed Literature Survey</h1>
+        </header>
+        <div id="papers">
+            <section>
+                <h2>Neural 3D Mesh Renderer</h2>
+                <p>Link: <a href="https://arxiv.org/pdf/1711.07566">https://arxiv.org/pdf/1711.07566</a></p>
+                <p>Data: 2D renderings of ShapeNetCore dataset 3D objects</p>
+                <p>Loss:</p>
+                    <ul>
+                        <li>IoU (intersection over union) of Ground-truth silhouette vs silhouette of 3d mesh.</li>
+                        <li>Smoothness, (cos + 1)^2 of theta between adjacent faces</li>
+                    </ul>
+                <p>Model: Deformation of a spherical mesh, followed by rasterization in a "blurry" way that makes way for an approximate gradient</p>
+                <p>Main advancement: Differentiable rasterization, 3d mesh from single images without conditioning on object class, 2d to 3d style transfer</p>
+                <p>Limitations: 3d models not very good esp. wrt occluded features and complicated shapes (car, lamp , table). 
+                No priors means no knowledge of occluded features, and silhouettes don't convey enough information to generate good-looking, usable meshes for any complex shapes.</p>
+            </section>
+            <section>
+                <h2>Pixel2Mesh</h2>
+                <p>Link: <a href="https://arxiv.org/pdf/1804.01654">https://arxiv.org/pdf/1804.01654</a></p>
+                <p>Data: ShapeNet (50k 3d models from 13 categories)</p>
+                <p>Loss:</p>
+                    <ul>
+                        <li>Chamfer loss: sum of each point's distance to the other mesh (min distance over other mesh's points)</li>
+                        <li>Normal loss: Shortest edge from each point should be perpendicular to surface normal from corresponding ground truth vertex</li>
+                        <li>Laplacian regularization: Prevents any deformation block from deforming the mesh by too much</li>
+                        <li>Edge length regularization: Prevents flying vertices by penalizing long edges</li>
+                    </ul>
+                <p>Model: CNN to extract 2D features, Graph-ResNet with shortcut connections to deform mesh, graph unpooling layer to add vertices to the mesh</p>
+                <p>Main advancement: Coarse-to-fine approach, loss functions with ablation, GCN architecture</p>
+                <p>Limitations: Occluded features, mult-view / scene-level reconstruction</p>
+            </section>
+            <section>
+                <h2>NeRF</h2>
+                <p>Link: <a href="https://arxiv.org/pdf/2003.08934">https://arxiv.org/pdf/2003.08934</a></p>
+                <p>Objective:</p>
+                <p>Data:</p>
+                <p>Loss:</p>
+                    <ul>
+                        <li></li>
+                        <li></li>
+                    </ul>
+                <p>Model:</p>
+                <p>Main advancement:</p>
+                <p>Limitations:</p>
+            </section>
+            <section>
+                <h2>DreamFusion</h2>
+                <p>Link: <a href="https://openreview.net/pdf?id=FjNys5c7VyY">https://openreview.net/pdf?id=FjNys5c7VyY</a></p>
+                <p>Data: A single text-caption is used to train each NeRF independently.</p>
+                <p>Loss:</p>
+                <ul>
+                    <li>Introduce noise into rendering of inferred NeRF</li>
+                    <li>Take a frozen diffusion model, and ask it to predict the noise.</li>
+                    <li>Compare the prediction to the actual noise introduced.</li>
+                    <li>CLAIM: if the NeRF is "good" or "realistic", the diffusion model will find it easy to predict the noise, since it was trained on "good" images.</li>
+                </ul>
+                <p>Model: A single MLP, parameterizing a NeRF, for each caption to generate models from.</p>
+                <p>Main advancement: SDS -- Distilling the "world knowledge" of a 2D Imagen diffusion model, also differentiable rendering process for a NeRF (I still don't know the details of how that works)</p>
+                <p>Limitations:</p>
+                <ul>
+                    <li>The loss function is "mode-seeking" (don't yet know what exactly this means).</li>
+                    <li>Related to the above: The generated samples are low in variety compared to what 2-D diffusion models can make.</li>
+                    <li>
+                        The loss function seems roundabout? We want the diffusion model to help answer "Is this rendering reasonable?" But instead we get it to answer "If I add noise to this rendering, how good are you at denoising it?"
+                        I am not convinced that this is a great way to distill the "world knowledge" of a diffusion model. I want to think about if it could be done better.
+                    </li>
+                    <li>DreamFusion trains a *separate NeRF* for each caption, and training takes ~1.5 hours. This is way too slow for an inference-heavy, online application where we don't know queries in advance.</li>
+                </ul>
+            </section>
+            <section>
+                <h2>Magic3D</h2>
+                <p>Link: <a href="https://arxiv.org/pdf/2211.10440">https://arxiv.org/pdf/2211.10440</a></p>
+                <p>Data:</p>
+                <p>Loss:</p>
+                    <ul>
+                        <li></li>
+                        <li></li>
+                    </ul>
+                <p>Model:</p>
+                <p>Main advancement:</p>
+                <p>Limitations:</p>
+            </section>
+            <section>
+                <h2>Shap-E</h2>
+                <p>Link: <a href="https://arxiv.org/pdf/2305.02463">https://arxiv.org/pdf/2305.02463</a></p>
+                <p>Data:</p>
+                <p>Loss:</p>
+                    <ul>
+                        <li></li>
+                        <li></li>
+                    </ul>
+                <p>Model:</p>
+                <p>Main advancement:</p>
+                <p>Limitations:</p>
+            </section>
+            <section>
+                <h2>One-2-3-45</h2>
+                <p>Link: <a href="https://arxiv.org/pdf/2311.07885">https://arxiv.org/pdf/2311.07885</a></p>
+                <p>Data:</p>
+                <p>Loss:</p>
+                    <ul>
+                        <li></li>
+                        <li></li>
+                    </ul>
+                <p>Model:</p>
+                <p>Main advancement:</p>
+                <p>Limitations:</p>
+            </section>
+        </div>
+        <!-- <div id="axes">
+            <h2>Axes of Improvement</h2>
+            <h3>Fast Inference</h3>
+            <h3>Looks Right From Multiple Angles</h3>
+        </div> -->
+        <div id="misc">
+            <h2>Misc. Thoughts</h2>
+            <p>Coarse-to-fine is one aspect underlying the superiority of diffusion models for image generation. It's easier to generate the rough strokes of a picture first, then refine the details on top of that.</p>
+            <p>Pixel2Mesh tried to leverage this idea to make 3d meshes by iteratively deforming an ellipsoid and adding vertices, but downstream of DreamFusion we seem to have lost the coarse-to-fine paradigm.</p>
+            <p>I'm thinking that maybe coarse-to-fine can help with the multi-view consistency problems in One-2-3-45. In particular, what if we do the following:</p>
+            <p>Should I be deforming a mesh from a sphere? or trying to stick with nerf approach? What would a "coarse" nerf even look like????</p>
+            <pre>
+                <code>
+                    s = text prompt
+                    p[] = randomly chosen camera viewpoints
+                    # x are 2D RGB images from diffusion model
+                    # m is 3D mesh
+                    # r are renderings of m
+                    for t in linspace(...):
+                        x[t][i] = denoise_2d(s, x[t-1][i], r[t-1][i])
+                        m[t] = refine_3d(s, m[t-1]  )
+                        r[t][i] = render(m[t], p[i])
+                </code>
+            </pre>
+
+        </div>
+    </main>
+</body>
+</html>
