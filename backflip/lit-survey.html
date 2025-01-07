@@ -157,9 +157,9 @@
             <h2>Misc. Thoughts</h2>
             <p>Coarse-to-fine is one aspect underlying the superiority of diffusion models for image generation. It's easier to generate the rough strokes of a picture first, then refine the details on top of that.</p>
             <p>Pixel2Mesh tried to leverage this idea to make 3d meshes by iteratively deforming an ellipsoid and adding vertices, but downstream of DreamFusion we seem to have lost the coarse-to-fine paradigm.</p>
-            <p>I'm thinking that maybe coarse-to-fine can help with the multi-view consistency problems in One-2-3-45. In particular, what if we do the following:</p>
-            <p>Should I be deforming a mesh from a sphere? or trying to stick with nerf approach? What would a "coarse" nerf even look like????</p>
-            <pre>
+            <p>I'm thinking that maybe coarse-to-fine can help with the multi-view consistency problems in One-2-3-45.</p>
+            <p>In particular, could we use a diffusion model to hold hands with the 3d model as it is gradually formed? Then we can use the diffusion model's world knowledge to generate both coarse and fine features.</p>
+            <!-- <pre>
                 <code>
                     s = text prompt
                     p[] = randomly chosen camera viewpoints
@@ -171,7 +171,7 @@
                         m[t] = refine_3d(s, m[t-1]  )
                         r[t][i] = render(m[t], p[i])
                 </code>
-            </pre>
+            </pre> -->
 
         </div>
     </main>
