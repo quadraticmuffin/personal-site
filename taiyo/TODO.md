@@ -1,0 +1,5 @@
+- Make the game robust to changes in window size (currently auto loses)
+- Fix mobile
+    - touch/drag to preview, then press a button to confirm choice
+- add a reset button after game over
+- text on mobile looks weird and overlaps play area

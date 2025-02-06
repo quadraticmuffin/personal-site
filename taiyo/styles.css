@@ -10,3 +10,21 @@ canvas {
     height: 100vh;
     touch-action: none;
 }
+
+.game-title {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Arial', sans-serif;
+    font-size: 48px;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 
+        0 0 5px #fff,
+        0 0 10px #0fa,
+        0 0 20px #0fa,
+        0 0 40px #0fa;
+    z-index: 1000;
+    pointer-events: none;
+}

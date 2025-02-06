@@ -24,7 +24,7 @@ const TYPE_NAMES = {
 // Color palette for celestial bodies
 const CELESTIAL_COLORS = {
     [CelestialType.PEBBLE]: '#A0522D',      // Sienna brown
-    [CelestialType.ASTEROID]: '#808080',     // Gray
+    [CelestialType.ASTEROID]: '#8A2BE2',     // Purple (BlueViolet)
     [CelestialType.MOON]: '#C0C0C0',        // Silver
     [CelestialType.SMALL_PLANET]: '#32CD32', // Lime green
     [CelestialType.LARGE_PLANET]: '#4169E1', // Royal blue
