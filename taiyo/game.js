@@ -10,6 +10,7 @@ class Game {
         this.mouseX = 0;
         this.mouseY = 0;
         this.previewBody = null;
+        this.restartButton = document.querySelector('.restart-button');
         
         this.setupCanvas();
         this.setupEventListeners();
@@ -71,6 +72,11 @@ class Game {
             const y = touch.clientY - rect.top;
             this.handleMouseMove(x, y);
         });
+
+        // Restart button event
+        this.restartButton.addEventListener('click', () => {
+            this.restart();
+        });
     }
 
     handleInput(x, y) {
@@ -78,35 +84,59 @@ class Game {
 
         const centerX = this.canvas.width / 2;
         const centerY = this.canvas.height / 2;
-        const dx = x - centerX;
-        const dy = y - centerY;
-        const distanceFromCenter = Math.sqrt(dx * dx + dy * dy);
-
-        if (distanceFromCenter <= this.maxRadius) {
-            // Create a new body at the clicked position
-            const placedBody = new CelestialBody(x, y, this.currentType);
-            placedBody.vertices = this.previewBody.vertices; // Copy the preview shape
-            this.physics.addBody(placedBody);
-            
-            // Get new random type and update preview
-            const newType = this.getRandomStarterType();
-            this.currentType = newType;
-            this.previewBody = new CelestialBody(this.mouseX, this.mouseY, newType);
-        }
+        
+        // Create a temporary body to get its radius
+        const tempBody = new CelestialBody(0, 0, this.currentType);
+        
+        // Always place on the border, accounting for body radius
+        const borderPoint = this.getNearestBorderPoint(x, y, tempBody.radius);
+        
+        // Create a new body at the border position
+        const placedBody = new CelestialBody(borderPoint.x, borderPoint.y, this.currentType);
+        placedBody.vertices = this.previewBody.vertices; // Copy the preview shape
+        this.physics.addBody(placedBody);
+        
+        // Get new random type and update preview
+        const newType = this.getRandomStarterType();
+        const tempBody2 = new CelestialBody(0, 0, newType);
+        const borderPoint2 = this.getNearestBorderPoint(x, y, tempBody2.radius);
+        this.previewBody = new CelestialBody(borderPoint2.x, borderPoint2.y, newType);
+        this.currentType = newType;
     }
 
     handleMouseMove(x, y) {
         this.mouseX = x;
         this.mouseY = y;
         
+        // Create temporary body to get radius if preview doesn't exist
+        const radius = this.previewBody ? this.previewBody.radius : new CelestialBody(0, 0, this.currentType).radius;
+        
+        // Move preview to nearest border point, accounting for body radius
+        const borderPoint = this.getNearestBorderPoint(x, y, radius);
+        
         // Create preview body if it doesn't exist or if type changed
         if (!this.previewBody || this.previewBody.type !== this.currentType) {
-            this.previewBody = new CelestialBody(x, y, this.currentType);
+            this.previewBody = new CelestialBody(borderPoint.x, borderPoint.y, this.currentType);
         } else {
-            // Update position of existing preview body
-            this.previewBody.x = x;
-            this.previewBody.y = y;
+            // Update position of existing preview body to border point
+            this.previewBody.x = borderPoint.x;
+            this.previewBody.y = borderPoint.y;
         }
+    }
+
+    getNearestBorderPoint(x, y, bodyRadius) {
+        const centerX = this.canvas.width / 2;
+        const centerY = this.canvas.height / 2;
+        const dx = x - centerX;
+        const dy = y - centerY;
+        const angle = Math.atan2(dy, dx);
+        
+        // Calculate point on border, offset inward by body radius to ensure full containment
+        const placementRadius = this.maxRadius - bodyRadius;
+        return {
+            x: centerX + Math.cos(angle) * placementRadius,
+            y: centerY + Math.sin(angle) * placementRadius
+        };
     }
 
     spawnObject(x, y, type) {
@@ -134,6 +164,8 @@ class Game {
             
             if (distanceFromCenter > this.maxRadius) {
                 this.isGameOver = true;
+                // Show restart button when game is lost
+                this.restartButton.style.display = 'block';
                 return;
             }
         }
@@ -280,6 +312,18 @@ class Game {
             padding + circleRadius * 2 + textOffset,
             y
         );
+    }
+
+    restart() {
+        // Reset game state
+        this.physics = new PhysicsEngine();
+        this.currentType = this.getRandomStarterType();
+        this.hasBlackHole = false;
+        this.isGameOver = false;
+        this.previewBody = null;
+        
+        // Hide restart button
+        this.restartButton.style.display = 'none';
     }
 
     gameLoop() {

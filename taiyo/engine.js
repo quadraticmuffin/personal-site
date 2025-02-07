@@ -33,11 +33,19 @@ const CELESTIAL_COLORS = {
     [CelestialType.BLACK_HOLE]: '#000000'   // Black
 };
 
-// Constants for physics and sizing
-const BASE_RADIUS = 15;  // Base radius for a Pebble
-const GRAVITY_CONSTANT = 2.0;  // Increased gravity
-const ELASTIC_DAMPING = 0.8;  // Energy loss in collisions
-const FRICTION = 0.99;  // Velocity damping (1 = no friction, 0 = instant stop)
+// Helper function to get physics constants based on screen size
+function getPhysicsConstants() {
+    const canvas = document.getElementById('gameCanvas');
+    const minDimension = Math.min(canvas.width, canvas.height);
+    
+    return {
+        // Scale gravity with screen size - larger screens need stronger gravity
+        GRAVITY_CONSTANT: minDimension * 0.004,  // 0.4% of screen size
+        // Damping and friction remain similar but slightly adjusted for screen scale
+        ELASTIC_DAMPING: 0.98,  // Slight increase with screen size
+        FRICTION: 0.999  // Slight increase with screen size
+    };
+}
 
 class CelestialBody {
     constructor(x, y, type) {
@@ -52,8 +60,15 @@ class CelestialBody {
     }
 
     calculateRadius() {
+        // Get canvas dimensions
+        const canvas = document.getElementById('gameCanvas');
+        const minDimension = Math.min(canvas.width, canvas.height);
+        
+        // Base radius is 2% of the smaller canvas dimension
+        const baseRadius = minDimension * 0.02;
+        
         // Linear progression based on type
-        return BASE_RADIUS * (this.type + 1);
+        return baseRadius * (this.type + 1);
     }
 
     checkIfIrregular() {
@@ -153,6 +168,8 @@ class PhysicsEngine {
     }
 
     applyGravity() {
+        const physics = getPhysicsConstants();
+        
         for (let i = 0; i < this.bodies.length; i++) {
             for (let j = i + 1; j < this.bodies.length; j++) {
                 const body1 = this.bodies[i];
@@ -164,8 +181,8 @@ class PhysicsEngine {
                 
                 if (distance === 0) continue;
 
-                // Calculate gravitational force
-                const force = GRAVITY_CONSTANT * body1.radius * body2.radius / (distance * distance);
+                // Calculate gravitational force using dynamic gravity constant
+                const force = physics.GRAVITY_CONSTANT * body1.radius * body2.radius / (distance * distance);
                 const angle = Math.atan2(dy, dx);
 
                 // Apply forces
@@ -178,6 +195,8 @@ class PhysicsEngine {
     }
 
     handleElasticCollision(body1, body2) {
+        const physics = getPhysicsConstants();
+        
         // Calculate collision normal
         const dx = body2.x - body1.x;
         const dy = body2.y - body1.y;
@@ -200,15 +219,14 @@ class PhysicsEngine {
         body2.x += nx * overlap * ratio1;
         body2.y += ny * overlap * ratio1;
 
-        // Then calculate and apply velocity changes
+        // Then calculate and apply velocity changes with dynamic damping
         const relativeVelX = body2.velocityX - body1.velocityX;
         const relativeVelY = body2.velocityY - body1.velocityY;
 
-        // Apply impulse = change in mass * velocity
-        body1.velocityX += (1 + ELASTIC_DAMPING) * relativeVelX * ratio2;
-        body1.velocityY += (1 + ELASTIC_DAMPING) * relativeVelY * ratio2;
-        body2.velocityX -= (1 + ELASTIC_DAMPING) * relativeVelX * ratio1;
-        body2.velocityY -= (1 + ELASTIC_DAMPING) * relativeVelY * ratio1;
+        body1.velocityX += (1 + physics.ELASTIC_DAMPING) * relativeVelX * ratio2;
+        body1.velocityY += (1 + physics.ELASTIC_DAMPING) * relativeVelY * ratio2;
+        body2.velocityX -= (1 + physics.ELASTIC_DAMPING) * relativeVelX * ratio1;
+        body2.velocityY -= (1 + physics.ELASTIC_DAMPING) * relativeVelY * ratio1;
     }
 
     checkMerge(body1, body2) {
@@ -253,10 +271,12 @@ class PhysicsEngine {
     }
 
     update() {
+        const physics = getPhysicsConstants();
+        
         // Apply friction to all bodies
         for (const body of this.bodies) {
-            body.velocityX *= FRICTION;
-            body.velocityY *= FRICTION;
+            body.velocityX *= physics.FRICTION;
+            body.velocityY *= physics.FRICTION;
         }
 
         // Update positions
