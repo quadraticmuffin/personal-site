@@ -30,7 +30,7 @@ class Game {
         const updateCanvasSize = () => {
             this.canvas.width = window.innerWidth;
             this.canvas.height = window.innerHeight;
-            // Game boundary is 45% of the smaller screen dimension
+            // Game boundary is 25% of the smaller screen dimension
             this.maxRadius = Math.min(this.canvas.width, this.canvas.height) * 0.25;
         };
 

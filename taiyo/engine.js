@@ -40,9 +40,9 @@ function getPhysicsConstants() {
     
     return {
         // Scale gravity with screen size - larger screens need stronger gravity
-        GRAVITY_CONSTANT: minDimension * 0.004,  // 0.4% of screen size
+        GRAVITY_CONSTANT: minDimension * 0.003,  // 0.4% of screen size
         // Damping and friction remain similar but slightly adjusted for screen scale
-        ELASTIC_DAMPING: 0.98,  // Slight increase with screen size
+        ELASTIC_DAMPING: 1.0,  // Slight increase with screen size
         FRICTION: 0.999  // Slight increase with screen size
     };
 }
@@ -223,10 +223,10 @@ class PhysicsEngine {
         const relativeVelX = body2.velocityX - body1.velocityX;
         const relativeVelY = body2.velocityY - body1.velocityY;
 
-        body1.velocityX += (1 + physics.ELASTIC_DAMPING) * relativeVelX * ratio2;
-        body1.velocityY += (1 + physics.ELASTIC_DAMPING) * relativeVelY * ratio2;
-        body2.velocityX -= (1 + physics.ELASTIC_DAMPING) * relativeVelX * ratio1;
-        body2.velocityY -= (1 + physics.ELASTIC_DAMPING) * relativeVelY * ratio1;
+        body1.velocityX += Math.abs(nx) * (1 + physics.ELASTIC_DAMPING) * relativeVelX * ratio2;
+        body1.velocityY += Math.abs(ny) * (1 + physics.ELASTIC_DAMPING) * relativeVelY * ratio2;
+        body2.velocityX -= Math.abs(nx) * (1 + physics.ELASTIC_DAMPING) * relativeVelX * ratio1;
+        body2.velocityY -= Math.abs(ny) * (1 + physics.ELASTIC_DAMPING) * relativeVelY * ratio1;
     }
 
     checkMerge(body1, body2) {
