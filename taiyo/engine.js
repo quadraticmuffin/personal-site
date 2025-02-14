@@ -30,7 +30,7 @@ const CELESTIAL_COLORS = {
     [CelestialType.DUST]: '#D3D3D3',        // Light gray
     [CelestialType.COMET]: '#87CEEB',       // Sky blue
     [CelestialType.ASTEROID]: '#8A2BE2',    // Purple (BlueViolet)
-    [CelestialType.MOON]: '#C0C0C0',        // Silver
+    [CelestialType.MOON]: '#707070',        // Silver
     [CelestialType.SMALL_PLANET]: '#32CD32', // Lime green
     [CelestialType.LARGE_PLANET]: '#4169E1', // Royal blue
     [CelestialType.DWARF_STAR]: '#FF0000',   // Red

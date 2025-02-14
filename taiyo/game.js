@@ -4,7 +4,8 @@ class Game {
         this.ctx = this.canvas.getContext('2d');
         this.physics = new PhysicsEngine();
         this.maxRadius = 0;
-        this.currentType = this.getRandomStarterType();  // Start with random type
+        this.currentType = this.getRandomStarterType();  // Current type for preview
+        this.nextType = this.getRandomStarterType();     // Next type to be shown
         this.hasBlackHole = false;
         this.isGameOver = false;
         this.mouseX = 0;
@@ -96,12 +97,14 @@ class Game {
         placedBody.vertices = this.previewBody.vertices; // Copy the preview shape
         this.physics.addBody(placedBody);
         
-        // Get new random type and update preview
-        const newType = this.getRandomStarterType();
-        const tempBody2 = new CelestialBody(0, 0, newType);
+        // Current type becomes next type, generate new next type
+        this.currentType = this.nextType;
+        this.nextType = this.getRandomStarterType();
+        
+        // Update preview body for new current type
+        const tempBody2 = new CelestialBody(0, 0, this.currentType);
         const borderPoint2 = this.getNearestBorderPoint(x, y, tempBody2.radius);
-        this.previewBody = new CelestialBody(borderPoint2.x, borderPoint2.y, newType);
-        this.currentType = newType;
+        this.previewBody = new CelestialBody(borderPoint2.x, borderPoint2.y, this.currentType);
     }
 
     handleMouseMove(x, y) {
@@ -259,13 +262,14 @@ class Game {
         this.ctx.textBaseline = 'middle';
         
         let y = padding;
-        
+
         // Title
         this.ctx.fillStyle = 'white';
         this.ctx.font = 'bold 18px Arial';
         this.ctx.fillText('Celestial Bodies', padding, y);
         y += lineHeight;
-        
+
+        // Draw legend entries
         this.ctx.font = '16px Arial';
         // Draw entry for each type
         Object.entries(CELESTIAL_COLORS).forEach(([type, color]) => {
@@ -274,10 +278,10 @@ class Game {
             this.ctx.arc(padding + circleRadius, y, circleRadius, 0, Math.PI * 2);
             this.ctx.fillStyle = color;
             this.ctx.fill();
-            this.ctx.lineWidth = 2;  // Consistent border width
+            this.ctx.lineWidth = 2;
             this.ctx.strokeStyle = 'white';
             this.ctx.stroke();
-            
+
             // Draw text
             this.ctx.fillStyle = 'white';
             this.ctx.fillText(
@@ -289,26 +293,26 @@ class Game {
             y += lineHeight;
         });
 
-        // Draw current type indicator
+        // Draw next type indicator
         y += lineHeight / 2;
         this.ctx.fillStyle = 'white';
         this.ctx.font = 'bold 18px Arial';
         this.ctx.fillText('Next Body:', padding, y);
         y += lineHeight;
         
-        // Draw circle for current type
+        // Draw circle for next type
         this.ctx.beginPath();
         this.ctx.arc(padding + circleRadius, y, circleRadius, 0, Math.PI * 2);
-        this.ctx.fillStyle = CELESTIAL_COLORS[this.currentType];
+        this.ctx.fillStyle = CELESTIAL_COLORS[this.nextType];
         this.ctx.fill();
         this.ctx.lineWidth = 2;  // Consistent border width
         this.ctx.strokeStyle = 'white';
         this.ctx.stroke();
         
-        // Draw text for current type
+        // Draw text for next type
         this.ctx.fillStyle = 'white';
         this.ctx.fillText(
-            TYPE_NAMES[this.currentType],
+            TYPE_NAMES[this.nextType],
             padding + circleRadius * 2 + textOffset,
             y
         );
@@ -318,6 +322,7 @@ class Game {
         // Reset game state
         this.physics = new PhysicsEngine();
         this.currentType = this.getRandomStarterType();
+        this.nextType = this.getRandomStarterType();
         this.hasBlackHole = false;
         this.isGameOver = false;
         this.previewBody = null;
