@@ -46,7 +46,7 @@ function getPhysicsConstants() {
     
     return {
         // Scale gravity with screen size - larger screens need stronger gravity
-        GRAVITY_CONSTANT: minDimension * 0.003,  // 0.4% of screen size
+        GRAVITY_CONSTANT: minDimension * 0.01,  // 0.4% of screen size
         // Damping and friction remain similar but slightly adjusted for screen scale
         ELASTIC_DAMPING: 1.0,  // Slight increase with screen size
         FRICTION: 0.999  // Slight increase with screen size
