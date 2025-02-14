@@ -38,7 +38,7 @@ jobs:
         run: |
           sudo apt-get install -y sed
           sed -i 's|{{CLOUDFLARE_TOKEN}}|'${{ secrets.CLOUDFLARE_TOKEN }}'|g' ./taiyo/index.html
-
+          grep "CLOUDFLARE_TOKEN" .\taiyo\index.html
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
