@@ -1,36 +1,42 @@
 // Celestial body types and progression
 const CelestialType = {
-    PEBBLE: 0,
-    ASTEROID: 1,
-    MOON: 2,
-    SMALL_PLANET: 3,
-    LARGE_PLANET: 4,
-    STAR: 5,
-    SUPERGIANT_STAR: 6,
-    BLACK_HOLE: 7
+    DUST: 0,
+    COMET: 1,
+    ASTEROID: 2,
+    MOON: 3,
+    SMALL_PLANET: 4,
+    LARGE_PLANET: 5,
+    DWARF_STAR: 6,
+    MAIN_STAR: 7,
+    SUPERGIANT_STAR: 8,
+    BLACK_HOLE: 9
 };
 
 const TYPE_NAMES = {
-    [CelestialType.PEBBLE]: 'Pebble',
+    [CelestialType.DUST]: 'Dust',
+    [CelestialType.COMET]: 'Comet',
     [CelestialType.ASTEROID]: 'Asteroid',
     [CelestialType.MOON]: 'Moon',
     [CelestialType.SMALL_PLANET]: 'Small Planet',
     [CelestialType.LARGE_PLANET]: 'Large Planet',
-    [CelestialType.STAR]: 'Star',
+    [CelestialType.DWARF_STAR]: 'Dwarf Star',
+    [CelestialType.MAIN_STAR]: 'Main Star',
     [CelestialType.SUPERGIANT_STAR]: 'Supergiant Star',
     [CelestialType.BLACK_HOLE]: 'Black Hole'
 };
 
 // Color palette for celestial bodies
 const CELESTIAL_COLORS = {
-    [CelestialType.PEBBLE]: '#A0522D',      // Sienna brown
-    [CelestialType.ASTEROID]: '#8A2BE2',     // Purple (BlueViolet)
+    [CelestialType.DUST]: '#D3D3D3',        // Light gray
+    [CelestialType.COMET]: '#87CEEB',       // Sky blue
+    [CelestialType.ASTEROID]: '#8A2BE2',    // Purple (BlueViolet)
     [CelestialType.MOON]: '#C0C0C0',        // Silver
     [CelestialType.SMALL_PLANET]: '#32CD32', // Lime green
     [CelestialType.LARGE_PLANET]: '#4169E1', // Royal blue
-    [CelestialType.STAR]: '#FFD700',        // Gold
-    [CelestialType.SUPERGIANT_STAR]: '#FF4500',  // Orange red
-    [CelestialType.BLACK_HOLE]: '#000000'   // Black
+    [CelestialType.DWARF_STAR]: '#FF0000',   // Red
+    [CelestialType.MAIN_STAR]: '#FFD700',    // Gold
+    [CelestialType.SUPERGIANT_STAR]: '#FF4500', // Orange red
+    [CelestialType.BLACK_HOLE]: '#000000'    // Black
 };
 
 // Helper function to get physics constants based on screen size
@@ -65,10 +71,11 @@ class CelestialBody {
         const minDimension = Math.min(canvas.width, canvas.height);
         
         // Base radius is 2% of the smaller canvas dimension
-        const baseRadius = minDimension * 0.02;
+        const baseRadius = minDimension * 0.03;
+        const radiusIncrement = minDimension * 0.015;
         
         // Linear progression based on type
-        return baseRadius * (this.type + 1);
+        return baseRadius + (this.type * radiusIncrement);
     }
 
     checkIfIrregular() {

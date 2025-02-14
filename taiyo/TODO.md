@@ -1,4 +1,4 @@
 - Make the game robust to changes in window size (currently auto loses)
 - Fix mobile
     - touch/drag to preview, then press a button to confirm choice
-- text on mobile looks weird and overlaps play area
+    - text on mobile looks weird and overlaps play area

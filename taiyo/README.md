@@ -9,7 +9,7 @@ A physics-based celestial object merging game where players combine increasingly
     The game focuses on merging celestial bodies to create increasingly larger objects. The ultimate goal is to create a Black Hole. Once the player creates a Black Hole, they win the game.
 
     The progression of merging bodies is as follows:
-    *   Pebble < Asteroid < Moon < Small Planet (e.g. Earth) < Large Planet (e.g. Saturn) < Star < Supergiant Star < Black Hole
+    *   Dust < Comet < Asteroid < Moon < Small Planet < Large Planet < Dwarf Star < Main Star < Supergiant Star < Black Hole
 5. **Physics Engine**: A gravity physics engine will simulate realistic gravitational attraction, where the bigger the object, the stronger its gravitational pull.
 
 ### **Game Elements**
@@ -18,18 +18,19 @@ A physics-based celestial object merging game where players combine increasingly
 
 ##### **Merging Objects**
    - Two objects of the same type will merge when they collide, following this hierarchy:
-     - Two Pebbles → Asteroid
+     - Two Dust → Comet
+     - Two Comets → Asteroid
      - Two Asteroids → Moon
-     - Two Moons → Small Planet (Earth-like)
-     - Two Small Planets → Large Planet (Saturn-like)
-     - Two Large Planets → Star
-     - Two Stars → Supergiant Star
+     - Two Moons → Small Planet
+     - Two Small Planets → Large Planet
+     - Two Large Planets → Dwarf Star
+     - Two Dwarf Stars → Main Star
+     - Two Main Stars → Supergiant Star
      - Two Supergiant Stars → Black Hole (Win condition!)
    - Object radii increase linearly with their rank in the hierarchy
-   - Irregular objects (Asteroids, Moons, Large Planets) have irregular collision boxes matching their shape
 
 ##### **Player Actions**
-   - Players can place new objects (limited to Pebbles, Asteroids, or Moons) anywhere within the game radius
+   - Players can place new objects (limited to Dust, Comets, or Asteroids) on the edge of the game boundary
    - A dotted line circle always shows the maximum allowed total size
    - If the combined size of all objects exceeds this radius, the game is lost
    - This includes both newly placed bodies and existing bodies that drift out due to physics
@@ -40,8 +41,7 @@ A physics-based celestial object merging game where players combine increasingly
    - Objects will merge upon collision if they are of the same type
    - All non-merging collisions are elastic (objects bounce off each other)
    - Collision detection uses:
-     - Regular circular collision boxes for spherical objects (Pebbles, Small Planets, Stars, Supergiant Stars, Black Holes)
-     - Irregular collision boxes for non-spherical objects (Asteroids, Moons, Large Planets)
+     - Regular circular collision boxes for spherical objects (Dust, Small Planets, Dwarf Stars, Main Stars, Supergiant Stars, Black Holes)
 
 #### **2. Visuals**
    - **Art Style**: The game will feature a cute and lofi art style. Celestial bodies will have smiley faces to enhance the charming aesthetic.
