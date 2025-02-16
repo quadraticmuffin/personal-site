@@ -5,9 +5,16 @@ class ThreeBodySimulation {
         this.width = width;
         this.height = height;
         
-        // Set up Matter.js engine
+        // Set up Matter.js engine with fixed time step
         this.engine = Matter.Engine.create({
-            gravity: { x: 0, y: 0 }
+            gravity: { x: 0, y: 0 },
+            enableSleeping: false,
+            timing: {
+                timeScale: 1,
+                timestamp: 0,
+                lastDelta: 16.666667, // Target 60 FPS
+                lastElapsed: 16.666667
+            }
         });
         
         // Constants
@@ -24,14 +31,14 @@ class ThreeBodySimulation {
         this.walls = this.createWalls();
         this.trails = this.bodies.map(() => []);
         
-        // Add bodies and walls to the world
-        Matter.World.add(this.engine.world, [...this.bodies, ...this.walls]);
+        // Add all bodies to the world
+        Matter.Composite.add(this.engine.world, [...this.bodies, ...this.walls]);
         
-        // Animation frame ID for cleanup
-        this.animationFrameId = null;
-        
-        // Start the simulation
-        this.run();
+        // Start animation
+        this.lastTime = performance.now();
+        this.fixedDelta = 1000 / 60; // 60 FPS
+        this.accumulator = 0;
+        this.animate();
     }
     
     generateColors() {
@@ -116,6 +123,20 @@ class ThreeBodySimulation {
         };
     }
     
+    updateGravity() {
+        // Apply gravitational forces between all bodies
+        for (let i = 0; i < this.bodies.length; i++) {
+            for (let j = i + 1; j < this.bodies.length; j++) {
+                const force = this.calculateGravity(this.bodies[i], this.bodies[j]);
+                Matter.Body.applyForce(this.bodies[i], this.bodies[i].position, force);
+                Matter.Body.applyForce(this.bodies[j], this.bodies[j].position, {
+                    x: -force.x,
+                    y: -force.y
+                });
+            }
+        }
+    }
+    
     updateTrails() {
         this.bodies.forEach((body, index) => {
             this.trails[index].push({ x: body.position.x, y: body.position.y });
@@ -187,35 +208,42 @@ class ThreeBodySimulation {
         });
     }
     
-    update() {
-        // Apply gravitational forces between all bodies
-        for (let i = 0; i < this.bodies.length; i++) {
-            for (let j = i + 1; j < this.bodies.length; j++) {
-                const force = this.calculateGravity(this.bodies[i], this.bodies[j]);
-                Matter.Body.applyForce(this.bodies[i], this.bodies[i].position, force);
-                Matter.Body.applyForce(this.bodies[j], this.bodies[j].position, {
-                    x: -force.x,
-                    y: -force.y
-                });
-            }
-        }
-        
-        Matter.Engine.update(this.engine);
-        this.updateTrails();
-    }
-    
     render() {
+        // Clear with alpha for trails
         this.ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
         this.ctx.fillRect(0, 0, this.width, this.height);
         
+        // Draw trails and bodies
         this.drawTrails();
         this.drawBodies();
     }
     
-    run() {
-        this.update();
+    animate() {
+        const currentTime = performance.now();
+        let deltaTime = currentTime - this.lastTime;
+        this.lastTime = currentTime;
+        
+        // Prevent spiral of death with large delta times
+        if (deltaTime > 100) {
+            deltaTime = this.fixedDelta;
+        }
+        
+        // Accumulate time and update physics in fixed time steps
+        this.accumulator += deltaTime;
+        while (this.accumulator >= this.fixedDelta) {
+            Matter.Engine.update(this.engine, this.fixedDelta);
+            this.updateGravity();
+            this.updateTrails();
+            this.accumulator -= this.fixedDelta;
+        }
+        
+        // Render at screen refresh rate
         this.render();
-        this.animationFrameId = requestAnimationFrame(() => this.run());
+        
+        // Request next frame
+        if (!this.isDestroyed) {
+            requestAnimationFrame(() => this.animate());
+        }
     }
     
     destroy() {
