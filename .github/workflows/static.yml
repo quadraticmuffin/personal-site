@@ -37,7 +37,7 @@ jobs:
       - name: Inject Cloudflare Token into HTML
         run: |
           sudo apt-get install -y sed
-          sed -i 's|{{CLOUDFLARE_TOKEN}}|'${{ secrets.CLOUDFLARE_TOKEN }}'|g' ./taiyo/index.html
+          sed -i 's|{{CLOUDFLARE_TOKEN}}|'${{ secrets.CLOUDFLARE_TOKEN }}'|g' ./*/index.html
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
