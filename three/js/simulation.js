@@ -1,7 +1,9 @@
 class ThreeBodySimulation {
-    constructor(canvas) {
+    constructor(canvas, width, height) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
+        this.width = width;
+        this.height = height;
         
         // Set up Matter.js engine
         this.engine = Matter.Engine.create({
@@ -47,21 +49,21 @@ class ThreeBodySimulation {
         const thickness = 60;
         return [
             // Top wall
-            Matter.Bodies.rectangle(this.canvas.width / 2, -thickness / 2, this.canvas.width, thickness, { isStatic: true }),
+            Matter.Bodies.rectangle(this.width / 2, -thickness / 2, this.width, thickness, { isStatic: true }),
             // Bottom wall
-            Matter.Bodies.rectangle(this.canvas.width / 2, this.canvas.height + thickness / 2, this.canvas.width, thickness, { isStatic: true }),
+            Matter.Bodies.rectangle(this.width / 2, this.height + thickness / 2, this.width, thickness, { isStatic: true }),
             // Left wall
-            Matter.Bodies.rectangle(-thickness / 2, this.canvas.height / 2, thickness, this.canvas.height, { isStatic: true }),
+            Matter.Bodies.rectangle(-thickness / 2, this.height / 2, thickness, this.height, { isStatic: true }),
             // Right wall
-            Matter.Bodies.rectangle(this.canvas.width + thickness / 2, this.canvas.height / 2, thickness, this.canvas.height, { isStatic: true })
+            Matter.Bodies.rectangle(this.width + thickness / 2, this.height / 2, thickness, this.height, { isStatic: true })
         ];
     }
     
     createBodies() {
         // Calculate center and radius of the formation
-        const centerX = this.canvas.width / 2;
-        const centerY = this.canvas.height / 2;
-        const formationRadius = Math.min(this.canvas.width, this.canvas.height) * 0.2; // 20% of smaller dimension
+        const centerX = this.width / 2;
+        const centerY = this.height / 2;
+        const formationRadius = Math.min(this.width, this.height) * 0.2; // 20% of smaller dimension
         
         // Calculate positions in equilateral triangle formation
         const basePositions = Array.from({length: 3}, (_, i) => {
@@ -204,7 +206,7 @@ class ThreeBodySimulation {
     
     render() {
         this.ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.fillRect(0, 0, this.width, this.height);
         
         this.drawTrails();
         this.drawBodies();
@@ -229,7 +231,7 @@ class ThreeBodySimulation {
         Matter.Engine.clear(this.engine);
         
         // Clear the canvas
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.clearRect(0, 0, this.width, this.height);
         
         // Clear references
         this.bodies = null;
