@@ -11,6 +11,11 @@ class ThreeBodySimulation {
         // Constants
         this.G = 0.5; // Gravitational constant (adjusted for visualization)
         this.trailLength = 50;
+        this.radii = [25, 15, 20]; // Store radii as class property
+        this.masses = [50, 30, 40]; // Store masses as class property
+        
+        // Generate random colors with same luminosity
+        this.colors = this.generateColors();
         
         // Create bodies and walls
         this.bodies = this.createBodies();
@@ -25,6 +30,17 @@ class ThreeBodySimulation {
         
         // Start the simulation
         this.run();
+    }
+    
+    generateColors() {
+        // Start with a random hue
+        const startHue = Math.random() * 360;
+        // Generate three colors with hues 120 degrees apart
+        return Array.from({length: 3}, (_, i) => {
+            const hue = (startHue + i * 120) % 360;
+            // Use high saturation (85%) and medium-high lightness (60%) for vibrant but visible colors
+            return `hsl(${hue}, 85%, 60%)`;
+        });
     }
     
     createWalls() {
@@ -42,37 +58,44 @@ class ThreeBodySimulation {
     }
     
     createBodies() {
-        const radii = [25, 15, 20]; // Varying sizes
-        const masses = [150, 80, 100]; // Masses proportional to size
+        // Calculate center and radius of the formation
+        const centerX = this.canvas.width / 2;
+        const centerY = this.canvas.height / 2;
+        const formationRadius = Math.min(this.canvas.width, this.canvas.height) * 0.2; // 20% of smaller dimension
         
-        const bodies = [
-            Matter.Bodies.circle(300, 300, radii[0], {
-                render: { fillStyle: '#FF6B6B' },
-                mass: masses[0],
-                friction: 0,
-                frictionAir: 0,
-                restitution: 0.9
-            }),
-            Matter.Bodies.circle(500, 300, radii[1], {
-                render: { fillStyle: '#4ECDC4' },
-                mass: masses[1],
-                friction: 0,
-                frictionAir: 0,
-                restitution: 0.9
-            }),
-            Matter.Bodies.circle(400, 500, radii[2], {
-                render: { fillStyle: '#FFE66D' },
-                mass: masses[2],
-                friction: 0,
-                frictionAir: 0,
-                restitution: 0.9
-            })
-        ];
+        // Calculate positions in equilateral triangle formation
+        const basePositions = Array.from({length: 3}, (_, i) => {
+            const angle = (i * 2 * Math.PI / 3) + Math.PI / 6; // Start at 30 degrees for better aesthetics
+            return {
+                x: centerX + formationRadius * Math.cos(angle),
+                y: centerY + formationRadius * Math.sin(angle)
+            };
+        });
         
-        // Set initial velocities
-        Matter.Body.setVelocity(bodies[0], { x: 2, y: 0 });
-        Matter.Body.setVelocity(bodies[1], { x: -2, y: 0 });
-        Matter.Body.setVelocity(bodies[2], { x: 0, y: 2 });
+        // Small random variation function
+        const vary = (value, range) => value + (Math.random() - 0.5) * range;
+        
+        const bodies = basePositions.map((pos, i) => {
+            // Add small random variations to positions (±10 pixels)
+            const variedPos = {
+                x: vary(pos.x, 20),
+                y: vary(pos.y, 20)
+            };
+            
+            // Create the body
+            return Matter.Bodies.circle(variedPos.x, variedPos.y, this.radii[i], {
+                render: { fillStyle: this.colors[i] },
+                mass: this.masses[i],
+                friction: 0,
+                frictionAir: 0,
+                restitution: 0.9
+            });
+        });
+        
+        // Set zero initial velocities
+        bodies.forEach(body => {
+            Matter.Body.setVelocity(body, { x: 0, y: 0 });
+        });
         
         return bodies;
     }
@@ -117,14 +140,13 @@ class ThreeBodySimulation {
     }
     
     drawTrails() {
-        const colors = ['#FF6B6B', '#4ECDC4', '#FFE66D'];
         const STEPS = 10; // Number of interpolation steps between each point
         
         this.trails.forEach((trail, index) => {
             if (trail.length < 4) return; // Need at least 4 points for Catmull-Rom
             
             this.ctx.beginPath();
-            this.ctx.strokeStyle = colors[index];
+            this.ctx.strokeStyle = this.colors[index];
             this.ctx.lineWidth = 2;
             
             // Start from the first actual point
@@ -155,13 +177,10 @@ class ThreeBodySimulation {
     }
     
     drawBodies() {
-        const colors = ['#FF6B6B', '#4ECDC4', '#FFE66D'];
-        const radii = [25, 15, 20]; // Match the radii from createBodies
-        
         this.bodies.forEach((body, index) => {
             this.ctx.beginPath();
-            this.ctx.fillStyle = colors[index];
-            this.ctx.arc(body.position.x, body.position.y, radii[index], 0, Math.PI * 2);
+            this.ctx.fillStyle = this.colors[index];
+            this.ctx.arc(body.position.x, body.position.y, this.radii[index], 0, Math.PI * 2);
             this.ctx.fill();
         });
     }
