@@ -33,16 +33,17 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
-        
-      - name: Inject Cloudflare Token into HTML
+      - name: Build site
+        # Copy only the files that should be served (no .github/, LICENSE, READMEs, TODOs)
         run: |
-          sudo apt-get install -y sed
-          sed -i 's|{{CLOUDFLARE_TOKEN}}|'${{ secrets.CLOUDFLARE_TOKEN }}'|g' ./*/index.html
+          mkdir _site
+          cp -r index.html CNAME taiyo three _site/
+          find _site -name 'README.md' -delete
+          find _site -name 'TODO.md' -delete
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository
-          path: '.'
+          path: '_site'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
